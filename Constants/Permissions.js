@@ -54,6 +54,10 @@ export const Permissions = {
   VitaminK: "VitaminK",
   Zinc: "Zinc",
   Water: "Water",
+  DietaryEnergy: "DietaryEnergy",
+  DietaryCarbohydrates: "DietaryCarbohydrates",
+  DietaryFatTotal: "DietaryFatTotal",
+  DietaryProtein: "DietaryProtein",
   DistanceCycling: "DistanceCycling",
   DistanceWalkingRunning: "DistanceWalkingRunning",
   FlightsClimbed: "FlightsClimbed",
@@ -67,5 +71,6 @@ export const Permissions = {
   StepCount: "StepCount",
   Steps: "Steps",
   Weight: "Weight",
-  Workout: "Workout"
+  Workout: "Workout",
+  WorkoutType: "WorkoutType",
 }
