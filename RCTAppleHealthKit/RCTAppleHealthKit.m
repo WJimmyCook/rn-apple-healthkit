@@ -34,6 +34,11 @@ RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
     [self isHealthKitAvailable:callback];
 }
 
+RCT_EXPORT_METHOD(authStatus:(NSArray *)permissionNames resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self authorizationStatus:permissionNames resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(initHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self initializeHealthKit:input callback:callback];
@@ -226,6 +231,14 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
 }
 
 
+-(instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.healthStore = [[HKHealthStore alloc] init];
+    }
+}
+
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
 {
     BOOL isAvailable = NO;
@@ -235,11 +248,30 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
     callback(@[[NSNull null], @(isAvailable)]);
 }
 
+- (void)authorizationStatus:(NSArray *)permissionNames resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    if ([permissionNames count] == 0) {
+        reject(@"no_permission_provided", @"[HealthKit][authorizationStatus] please provide permission names", [NSNull null]);
+    }
+    
+    NSSet *permissionObjects = [self getWritePermsFromOptions: permissionNames];
+    
+    NSMutableArray *authStatuses = [[NSMutableArray alloc] init];
+    for(HKObjectType *permission in permissionObjects) {
+        [authStatuses addObject:@([self.healthStore authorizationStatusForType:permission])];
+    }
+    
+    if([authStatuses containsObject:@(HKAuthorizationStatusSharingDenied)]) {
+        resolve(@"DENIED");
+    } else if ([authStatuses containsObject:@(HKAuthorizationStatusNotDetermined)]) {
+        resolve(@"UNKNOWN");
+    } else {
+        resolve(@"AUTHORIZED");
+    }
+}
 
 - (void)initializeHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
-    self.healthStore = [[HKHealthStore alloc] init];
-
     if ([HKHealthStore isHealthDataAvailable]) {
         NSSet *writeDataTypes;
         NSSet *readDataTypes;
