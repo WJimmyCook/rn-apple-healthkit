@@ -252,6 +252,8 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
     if (self) {
         self.healthStore = [[HKHealthStore alloc] init];
     }
+    
+    return self;
 }
 
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
