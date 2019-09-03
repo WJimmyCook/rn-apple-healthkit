@@ -34,6 +34,21 @@ RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
     [self isHealthKitAvailable:callback];
 }
 
+RCT_EXPORT_METHOD(openSettings)
+{
+    [self openHealthKitSettings];
+}
+
+RCT_EXPORT_METHOD(reportMeal:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self reportHealthKitMeal:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(deleteMeal:(NSString *)mealId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self deleteHealthKitMeal:mealId resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(authStatus:(NSArray *)permissionNames resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self authorizationStatus:permissionNames resolver:resolve rejecter:reject];
@@ -318,6 +333,15 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
     }
 }
 
+- (void)openHealthKitSettings {
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        NSURL *privacySettingsUrl = [NSURL URLWithString:@"App-Prefs:"];
+        // Note: On iOS 11 this will just open the settings app without navigating to Privacy.
+        // https://stackoverflow.com/questions/46253781/ios-11-url-scheme-for-specific-settings-section-stopped-working
+        [[UIApplication sharedApplication] openURL:privacySettingsUrl];
+    });
+}
+
 - (void)getModuleInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     NSDictionary *info = @{
@@ -327,6 +351,104 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
             @"author": @"Greg Wilson",
     };
     callback(@[[NSNull null], info]);
+}
+
+#pragma mark Meals
+-(void)reportHealthKitMeal:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    NSString *id = [input objectForKey:@"id"];
+    NSString *name = [input objectForKey:@"name"];
+    NSString *type = [input objectForKey:@"type"];
+    NSDictionary *macros = [input objectForKey:@"macros"];
+    
+    if (!id || !name || !type || !macros) {
+        reject(@"healthkit_error", @"invalid data provided", nil);
+    }
+    
+    NSString *dateTimeString = [input objectForKey:@"dateTime"];
+    int energy = [[input valueForKey:@"energy"] integerValue];
+    int fat = [[macros valueForKey:@"macros"] integerValue];
+    int fiber = [[macros valueForKey:@"fiber"] integerValue];
+    int sugar = [[macros valueForKey:@"sugar"] integerValue];
+    int carbs = [[macros valueForKey:@"carbs"] integerValue];
+    int protein = [[macros valueForKey:@"protein"] integerValue];
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ss.SSS";
+    NSDate *mealDate = [dateFormatter dateFromString:dateTimeString];
+    NSDictionary *metadata = @{
+                               @"mealId": id,
+                               @"recipe" : name,
+                               @"type": type
+                               };
+    HKQuantitySample *fatSample = [self createMealSample:fat unit:[HKUnit gramUnit] typeIdentifier:HKQuantityTypeIdentifierDietaryFatTotal mealDate:mealDate meatadata:metadata];
+    HKQuantitySample *fiberSample = [self createMealSample:fiber unit:[HKUnit gramUnit] typeIdentifier:HKQuantityTypeIdentifierDietaryFiber mealDate:mealDate meatadata:metadata];
+    HKQuantitySample *sugarSample = [self createMealSample:sugar unit:[HKUnit gramUnit] typeIdentifier:HKQuantityTypeIdentifierDietarySugar mealDate:mealDate meatadata:metadata];
+    HKQuantitySample *carbsSample = [self createMealSample:carbs unit:[HKUnit gramUnit] typeIdentifier:HKQuantityTypeIdentifierDietaryCarbohydrates mealDate:mealDate meatadata:metadata];
+    HKQuantitySample *proteinSample = [self createMealSample:protein unit:[HKUnit gramUnit] typeIdentifier:HKQuantityTypeIdentifierDietaryProtein mealDate:mealDate meatadata:metadata];
+    HKQuantitySample *energySample = [self createMealSample:energy unit:[HKUnit kilocalorieUnit] typeIdentifier:HKQuantityTypeIdentifierDietaryEnergyConsumed mealDate:mealDate meatadata:metadata];
+    
+    NSArray<HKQuantitySample *> *mealSamples = @[fatSample, fiberSample, sugarSample, carbsSample, proteinSample, energySample];
+    
+    if ([mealSamples count] == 0) {
+        reject(@"healthkit_error", @"no meal samples provided", nil);
+    }
+    
+    [self.healthStore saveObjects:mealSamples withCompletion:^(BOOL success, NSError * _Nullable error) {
+        if (success) {
+            resolve(nil);
+        } else {
+            reject(@"healthkit_error", @"failed to save", error);
+        }
+    }];
+}
+
+- (HKQuantitySample *)createMealSample:(int )quantity unit:(HKUnit *)unit typeIdentifier:(HKQuantityTypeIdentifier )typeIdentifier mealDate:(NSDate *)mealDate meatadata:(NSDictionary *)metadata
+{
+    HKQuantityType *type = [HKQuantityType quantityTypeForIdentifier:typeIdentifier];
+    HKQuantity *hkQuantity = [HKQuantity quantityWithUnit:unit doubleValue:quantity];
+    HKQuantitySample *mealSample = [HKQuantitySample quantitySampleWithType:type quantity:hkQuantity startDate:mealDate endDate:mealDate metadata:metadata];
+    
+    return mealSample;
+}
+
+-(void)deleteHealthKitMeal:(NSString *)mealId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    NSArray<HKQuantityTypeIdentifier> *identifiers = @[
+                                                       HKQuantityTypeIdentifierDietarySugar,
+                                                       HKQuantityTypeIdentifierDietaryProtein,
+                                                       HKQuantityTypeIdentifierDietaryFatTotal,
+                                                       HKQuantityTypeIdentifierDietaryCarbohydrates,
+                                                       HKQuantityTypeIdentifierDietaryFiber,
+                                                       HKQuantityTypeIdentifierDietaryEnergyConsumed
+                                                       ];
+    
+    __block NSError *failure;
+    for (HKQuantityTypeIdentifier identifier in identifiers) {
+        HKQuantityType *type = [HKQuantityType quantityTypeForIdentifier:identifier];
+        NSPredicate *predicate = [HKQuery predicateForObjectsWithMetadataKey:@"mealId" allowedValues:@[mealId]];
+        HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:type predicate:predicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable results, NSError * _Nullable error) {
+            if (error) {
+                failure = error;
+            }
+            
+            if (results) {
+                [self.healthStore deleteObjects:results withCompletion:^(BOOL success, NSError * _Nullable error) {
+                    if (error) {
+                        failure = error;
+                    }
+                }];
+            }
+        }];
+        
+        [self.healthStore executeQuery:query];
+    }
+    
+    if (failure) {
+        reject(@"healthkit_error", @"failed to delete meal data", failure);
+    } else {
+        resolve(nil);
+    }
 }
 
 @end
