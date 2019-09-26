@@ -369,7 +369,7 @@ RCT_EXPORT_METHOD(saveMindfulSession:(NSDictionary *)input callback:(RCTResponse
     
     NSString *dateTimeString = [input objectForKey:@"dateTime"];
     int energy = [[input valueForKey:@"energy"] integerValue];
-    int fat = [[macros valueForKey:@"macros"] integerValue];
+    int fat = [[macros valueForKey:@"fat"] integerValue];
     int fiber = [[macros valueForKey:@"fiber"] integerValue];
     int sugar = [[macros valueForKey:@"sugar"] integerValue];
     int carbs = [[macros valueForKey:@"carbs"] integerValue];
