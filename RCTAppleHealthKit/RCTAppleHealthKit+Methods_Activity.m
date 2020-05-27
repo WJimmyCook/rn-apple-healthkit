@@ -118,7 +118,6 @@
     double calories = [RCTAppleHealthKit doubleFromOptions:input key:@"calories" withDefault:0];
     NSDate *startDate = [RCTAppleHealthKit startDateFromOptions:input];
     NSDate *endDate = [RCTAppleHealthKit endDateFromOptions:input];
-    double duration = [RCTAppleHealthKit doubleFromOptions:input key:@"duration" withDefault:0];
     NSNumber *distance = input[@"distance"];
     NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@"TraditionalStrengthTraining"];
     
@@ -155,7 +154,6 @@
     HKWorkout *workout = [HKWorkout workoutWithActivityType:activityType
                                                   startDate:startDate
                                                     endDate:endDate
-                                                   duration:duration
                                           totalEnergyBurned:nil
                                               totalDistance:nil
                                                    metadata:@{@"Template": template}
