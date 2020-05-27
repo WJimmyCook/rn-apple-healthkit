@@ -56,6 +56,8 @@
         return HKWorkoutActivityTypeSwimming;
     } else if ([type isEqualToString: @"Tennis"]) {
         return HKWorkoutActivityTypeTennis;
+    } else if ([type isEqualToString: @"TraditionalStrengthTraining"]) {
+        return HKWorkoutActivityTypeTraditionalStrengthTraining;
     } else if ([type isEqualToString:@"Sailing"]) {
         return HKWorkoutActivityTypeSailing;
     } else if ([type isEqualToString:@"PaddleSports"]) {
@@ -117,7 +119,7 @@
     NSDate *startDate = [RCTAppleHealthKit startDateFromOptions:input];
     NSDate *endDate = [RCTAppleHealthKit endDateFromOptions:input];
     NSNumber *distance = input[@"distance"];
-    NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@"MixedMetabolicCardioTraining"];
+    NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@"TraditionalStrengthTraining"];
     
     HKWorkoutActivityType activityType = [self activityTypeFromString:type];
     NSMutableArray *workoutSamples = [NSMutableArray new];
