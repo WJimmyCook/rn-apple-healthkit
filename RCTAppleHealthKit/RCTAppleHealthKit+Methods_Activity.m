@@ -135,7 +135,7 @@
 //                                                                    metadata:@{@"reportId": reportId}
 //                                     ];
     
-    [workoutSamples addObject:kcalSample];
+//     [workoutSamples addObject:kcalSample];
     
     // create distance covered sample
 //     if (distance != nil) {
