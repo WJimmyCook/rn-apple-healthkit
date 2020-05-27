@@ -155,6 +155,8 @@
                                                   startDate:startDate
                                                     endDate:endDate
                                               workoutEvents:nil
+                                          totalEnergyBurned:nil
+                                              totalDistance:nil
                                                    metadata:@{@"Template": template}
                           ];
     
