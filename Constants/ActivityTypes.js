@@ -24,6 +24,7 @@ export const ActivityTypes = {
   SurfingSports: "SurfingSports",
   Swimming: "Swimming",
   Tennis: "Tennis",
+  TraditionalStrengthTraining:"TraditionalStrengthTraining",
   Walking: "Walking",
   WaterSports: "WaterSports",
   Yoga: "Yoga",
