@@ -157,7 +157,7 @@
                                               workoutEvents:nil
                                           totalEnergyBurned:kcalQuantity
                                               totalDistance:workoutDistance
-                                                   metadata:@{@"template": template}
+                                                   metadata:@{@"Template": template}
                           ];
     
     // save workout and add any samples necessary
