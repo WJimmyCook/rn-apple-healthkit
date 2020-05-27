@@ -125,38 +125,36 @@
     NSMutableArray *workoutSamples = [NSMutableArray new];
     HKQuantity *workoutDistance = nil;
     
-    // create energy burn sample
-    HKQuantity *kcalQuantity = [HKQuantity quantityWithUnit:[HKUnit unitFromString:@"kcal"] doubleValue:calories];
-    HKQuantityType *kcalType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
-    HKQuantitySample *kcalSample = [HKQuantitySample quantitySampleWithType:kcalType
-                                                                   quantity:kcalQuantity
-                                                                  startDate:startDate
-                                                                    endDate:endDate
-                                                                   metadata:@{@"reportId": reportId}
-                                    ];
+//     // create energy burn sample
+//     HKQuantity *kcalQuantity = [HKQuantity quantityWithUnit:[HKUnit unitFromString:@"kcal"] doubleValue:calories];
+//     HKQuantityType *kcalType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+//     HKQuantitySample *kcalSample = [HKQuantitySample quantitySampleWithType:kcalType
+//                                                                    quantity:kcalQuantity
+//                                                                   startDate:startDate
+//                                                                     endDate:endDate
+//                                                                    metadata:@{@"reportId": reportId}
+//                                     ];
     
     [workoutSamples addObject:kcalSample];
     
     // create distance covered sample
-    if (distance != nil) {
-        HKQuantity *distanceQuantity = [HKQuantity quantityWithUnit:[HKUnit unitFromString:@"m"] doubleValue:[distance doubleValue]];
-        HKQuantitySample *distanceSample = [HKQuantitySample quantitySampleWithType:[self distanceTypeForType:activityType]
-                                                                           quantity:distanceQuantity
-                                                                          startDate:startDate
-                                                                            endDate:endDate
-                                                                           metadata:@{@"reportId": reportId}
-                                            ];
+//     if (distance != nil) {
+//         HKQuantity *distanceQuantity = [HKQuantity quantityWithUnit:[HKUnit unitFromString:@"m"] doubleValue:[distance doubleValue]];
+//         HKQuantitySample *distanceSample = [HKQuantitySample quantitySampleWithType:[self distanceTypeForType:activityType]
+//                                                                            quantity:distanceQuantity
+//                                                                           startDate:startDate
+//                                                                             endDate:endDate
+//                                                                            metadata:@{@"reportId": reportId}
+//                                             ];
         
-        [workoutSamples addObject:distanceSample];
-    }
+//         [workoutSamples addObject:distanceSample];
+//     }
     
     // create the workout
     HKWorkout *workout = [HKWorkout workoutWithActivityType:activityType
                                                   startDate:startDate
                                                     endDate:endDate
                                               workoutEvents:nil
-                                          totalEnergyBurned:kcalQuantity
-                                              totalDistance:workoutDistance
                                                    metadata:@{@"Template": template}
                           ];
     
