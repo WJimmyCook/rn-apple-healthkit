@@ -114,7 +114,7 @@
 - (void)activity_saveWorkout:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     NSString *reportId = [RCTAppleHealthKit stringFromOptions:input key:@"id" withDefault:@""];
-    NSString *name = [RCTAppleHealthKit stringFromOptions:input key:@"name" withDefault:@"Workout"];
+    NSString *template = [RCTAppleHealthKit stringFromOptions:input key:@"template" withDefault:@"5/3/1"];
     double calories = [RCTAppleHealthKit doubleFromOptions:input key:@"calories" withDefault:0];
     NSDate *startDate = [RCTAppleHealthKit startDateFromOptions:input];
     NSDate *endDate = [RCTAppleHealthKit endDateFromOptions:input];
@@ -157,7 +157,7 @@
                                               workoutEvents:nil
                                           totalEnergyBurned:kcalQuantity
                                               totalDistance:workoutDistance
-                                                   metadata:@{@"name": name, @"reportId": reportId}
+                                                   metadata:@{@"template": template}
                           ];
     
     // save workout and add any samples necessary
