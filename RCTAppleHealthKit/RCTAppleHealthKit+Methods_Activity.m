@@ -137,7 +137,7 @@
     
     [workoutSamples addObject:kcalSample];
     
-    create distance covered sample
+//     create distance covered sample
     if (distance != nil) {
         HKQuantity *distanceQuantity = [HKQuantity quantityWithUnit:[HKUnit unitFromString:@"m"] doubleValue:[distance doubleValue]];
         HKQuantitySample *distanceSample = [HKQuantitySample quantitySampleWithType:[self distanceTypeForType:activityType]
