@@ -91,7 +91,7 @@
             callback(@[RCTMakeError(@"error saving the weight sample", error, nil)]);
             return;
         }
-        callback(@[[NSNull null], @(weight)]);
+        callback(@[[NSNull null], weightSample.UUID.UUIDString]);
     }];
 }
 
