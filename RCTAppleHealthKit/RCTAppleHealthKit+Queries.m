@@ -80,6 +80,7 @@
                 for (HKQuantitySample *sample in results) {
                     HKQuantity *quantity = sample.quantity;
                     double value = [quantity doubleValueForUnit:unit];
+                    NSString *uuid = sample.UUID.UUIDString;
 
                     NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
                     NSString *endDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate];
@@ -88,6 +89,7 @@
                             @"value" : @(value),
                             @"startDate" : startDateString,
                             @"endDate" : endDateString,
+                            @"uuid" : uuid,
                     };
 
                     [data addObject:elem];
