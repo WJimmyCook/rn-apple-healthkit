@@ -95,6 +95,36 @@
     }];
 }
 
+-(void)body_deleteWeight:(NSString *)weightId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    
+    __block NSError *failure;
+
+    HKQuantityType *type = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+    NSPredicate *predicate = [HKQuery predicateForObjectsWithMetadataKey:@"weightId" allowedValues:@[weightId]];
+    HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:type predicate:predicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable results, NSError * _Nullable error) {
+        if (error) {
+            failure = error;
+        }
+        
+        if (results) {
+            [self.healthStore deleteObjects:results withCompletion:^(BOOL success, NSError * _Nullable error) {
+                if (error) {
+                    failure = error;
+                }
+            }];
+        }
+    }];
+    
+    [self.healthStore executeQuery:query];
+    
+    if (failure) {
+        reject(@"healthkit_error", @"failed to delete meal data", failure);
+    } else {
+        resolve(nil);
+    }
+}
+
 
 - (void)body_getLatestBodyMassIndex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
